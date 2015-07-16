@@ -1,11 +1,16 @@
+
+# Promises mit Q https://www.npmjs.com/package/q
+
 cheerio = require 'cheerio'
 request = require 'request'
+Q = require 'q'
 
 url = "http://www.tierfreunde-helfen.de/index.php?zuhausegesucht-tiere-in-not"
 splitpos = url.lastIndexOf '/'
 base_url = url.slice 0, splitpos+1
 
-get_details = (url, callback)->
+get_details = (url) ->
+  deferred = Q.defer()
   request url, (err, response, body) ->
     $ = cheerio.load body
     name = $('.shady').find('h1').text()
@@ -15,13 +20,19 @@ get_details = (url, callback)->
       name: name
       url: url
       desc: $('.shady').text()
-    callback details
 
-get_detailUrls = (callback) ->
+    deferred.resolve details
+
+  deferred.promise
+
+get_detailUrls = () ->
+  deferred = Q.defer()
   request url, (err, response, body) ->
     if err
       console.error err
+      throw err
       return
+
     urls = []
     $ = cheerio.load body
     $('.teaser-subline').each ->
@@ -29,12 +40,24 @@ get_detailUrls = (callback) ->
       detail_url = base_url + elem.find('.teaser-image').find('a').attr('href')
       urls.push detail_url
       return
-    callback urls
 
-get_detailUrls (urls) ->
-  for url in urls
-    get_details url, (details) ->
-      console.log details
+    deferred.resolve urls;
+
+  deferred.promise
+
+
+get_alleDaten = (urls) ->
+  p = []
+  for url in urls[..2]
+    p.push get_details url
+
+  Q.all(p)
+
+
+Q.fcall get_detailUrls
+  .then get_alleDaten
+  .then (daten) ->
+    console.log "ERGEBNIS", daten
 
 ###
       tier =
@@ -44,3 +67,5 @@ get_detailUrls (urls) ->
         desc: elem.children().last().text()
       tiere.push tier
 ###
+
+console.log "EOS"
