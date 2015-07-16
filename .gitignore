@@ -21,3 +21,4 @@ doc/
 image.png
 
 parser/node_modules/
+parser/lib/
