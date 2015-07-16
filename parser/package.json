@@ -2,7 +2,7 @@
   "name": "parser",
   "version": "0.0.1",
   "description": "parse tierasyl-chemnitz.de",
-  "main": "index.js",
+  "main": "lib/scraper.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,7 @@
     "coffee": "~1.1.0",
     "request": "~2.58.0",
     "fs": "0.0.2",
-    "coffee-script": "~1.9.3"
+    "coffee-script": "~1.9.3",
+    "promise": "~7.0.3"
   }
 }
