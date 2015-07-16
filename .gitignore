@@ -19,3 +19,5 @@ tmp
 _yardoc
 doc/				
 image.png
+
+parser/node_modules/
