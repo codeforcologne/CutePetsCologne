@@ -1,9 +1,10 @@
 cheerio = require 'cheerio'
 request = require 'request'
 express = require 'express'
-fs = require 'fs'
+NodeCache = require 'node-cache'
 
 app = express()
+cache = new NodeCache()
 
 tierheim_url = "http://www.tierfreunde-helfen.de/index.php?zuhausegesucht-tiere-in-not"
 splitpos = tierheim_url.lastIndexOf '/'
@@ -19,10 +20,14 @@ get_details = (url)->
             $ = cheerio.load body
             content = $('#content')
             name = content.find('h1').text()
+            img = content.find('img').attr('src')
             pic = base_url + content.find('img').attr('src')
+            id = img.split '.', 1
+            id = id[0].split '/'
             content.find('h1').remove()
             content.find('a').remove()
             details =
+                id: id[-1..][0]
                 pic: pic
                 name: name
                 url: url
@@ -49,27 +54,38 @@ get_detailUrls = (url) ->
                 return
             f urls
 
-tiere = get_detailUrls tierheim_url
-    .then (urls) ->
-        p = []
-        for url in urls
-            p.push get_details url
-        Promise.all p
+get_data = ->
+    new Promise (f, r) ->
+        values = cache.get('tiere')
+        if not values
+            console.log "no cache"
+            get_detailUrls tierheim_url
+                .then (urls) ->
+                    p = []
+                    for url in urls
+                        p.push get_details url
+                    Promise.all p
+                .then (values) ->
+                    cache.set('tiere', values, 60*60*24)
+                    f values
+        else
+            console.log "cache"
+            f values
 
 ###
-tiere.then (values) ->
+get_data().then (values) ->
     console.log values
 ###
 
 app.get '/', (req, rep) ->
-    tiere.then (values) ->
+    get_data().then (values) ->
         #console.log values
         rep.json values
 
 app.get '/random', (req, rep) ->
-    tiere.then (values) ->
+    get_data().then (values) ->
         random = Math.ceil Math.random()*values.length-1
-        console.log random
+        #console.log random
         rep.json values[random]
 
 server = app.listen 3000, ->
