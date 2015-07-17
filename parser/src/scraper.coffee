@@ -30,7 +30,7 @@ get_details = (url)->
                 id: id[-1..][0]
                 pic: pic
                 name: name
-                url: url
+                link: url
                 desc: content
                     .text().replace(/\n/g, '')
                     .replace(/\r/g, '')
