@@ -1,0 +1,20 @@
+{
+  "name": "parser",
+  "version": "0.0.1",
+  "description": "parse tierasyl-chemnitz.de",
+  "main": "lib/scraper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/coffee -m -c -o lib/ src/"
+  },
+  "author": "Tobias Gall",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "~0.19.0",
+    "coffee-script": "~1.9.3",
+    "express": "^4.13.1",
+    "node-cache": "^3.0.0",
+    "promise": "~7.0.3",
+    "request": "~2.58.0"
+  }
+}
