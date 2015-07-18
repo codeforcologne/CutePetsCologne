@@ -64,8 +64,6 @@ get_data = ->
                     for url in urls
                         p.push get_details url
                     Promise.all p
-                .catch (err) ->
-                    r err
                 .then (values) ->
                     cache.set('tiere', values, 60*60*24)
                     f values
