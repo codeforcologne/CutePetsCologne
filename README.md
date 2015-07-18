@@ -23,7 +23,7 @@ Using user `pi`
 cd ~
 wget https://iojs.org/dist/v2.3.4/iojs-v2.3.4-linux-armv6l.tar.xz
 tar xf iojs-v2.3.4-linux-armv6l.tar.xz
-export PATH="/home/pi/"
+export PATH=/home/pi/iojs-v2.3.4-linux-armv6l/bin:$PATH
 ```
 
 ### ruby
