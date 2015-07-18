@@ -3,7 +3,7 @@ require 'json'
 require 'open-uri'
 
 class AdoptAPet
-  URL = 'http://[::]:3000/random'
+  URL = 'http://127.0.0.1:3000/random'
 
   def self.random
     pet = fetch_pet while pet.nil? || pet.error?
