@@ -16,9 +16,7 @@ get_details = (url)->
     new Promise (f, r) ->
         request url, (err, response, body) ->
             if err
-                console.error err
                 r err
-                return
             $ = cheerio.load body
             content = $('#content')
             name = content.find('h1').text()
@@ -45,16 +43,13 @@ get_detailUrls = (url) ->
     new Promise (f, r) ->
         request url, (err, response, body) ->
             if err
-                console.error err
                 r err
-                return
             urls = []
             $ = cheerio.load body
             $('.teaser-subline').each ->
                 elem = $(this)
                 detail_url = base_url + elem.find('.teaser-image').find('a').attr('href')
                 urls.push detail_url
-                return
             f urls
 
 # Get the data from cache or save data in cache if data is none
@@ -63,18 +58,20 @@ get_data = ->
     new Promise (f, r) ->
         values = cache.get('tiere')
         if not values
-            #console.log "no cache"
             get_detailUrls tierheim_url
                 .then (urls) ->
                     p = []
                     for url in urls
                         p.push get_details url
                     Promise.all p
+                .catch (err)
+                    r err
                 .then (values) ->
                     cache.set('tiere', values, 60*60*24)
                     f values
+                .catch err
+                    r err
         else
-            #console.log "cache"
             f values
 
 # get a pet that was not posted yet
@@ -88,7 +85,6 @@ get_notPostedPet = ->
                 fs.writeFileSync filename, JSON.stringify []
                 postedPets = []
         catch err
-            console.error err
             r err
         get_data().then (pets) ->
             notPostedPets = []
@@ -113,16 +109,22 @@ get_notPostedPet().then (pet) ->
 ###
 
 # Return all pets
-app.get '/', (req, rep) ->
-    get_data().then (pets) ->
-        #console.log values
-        rep.json pets
+app.get '/', (req, res) ->
+    get_data()
+        .then (pets) ->
+            res.json pets
+        .catch (err) ->
+            console.error err
+            res.status(500).json(err);
 
 # Return a random pet
-app.get '/random', (req, rep) ->
-    get_notPostedPet().then (pet) ->
-        #console.log pet
-        rep.json pet
+app.get '/random', (req, res) ->
+    get_notPostedPet()
+        .then (pet) ->
+            res.json pet
+        .catch (err) ->
+            console.error err
+            res.status(500).json(err);
 
 server = app.listen 3000, 'localhost', ->
     host = server.address().address
