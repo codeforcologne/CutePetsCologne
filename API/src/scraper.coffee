@@ -67,7 +67,7 @@ get_data = ->
                 .then (values) ->
                     cache.set('tiere', values, 60*60*24)
                     f values
-                .catch err ->
+                .catch (err) ->
                     r err
         else
             f values
