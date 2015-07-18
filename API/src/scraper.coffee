@@ -2,6 +2,7 @@ cheerio = require 'cheerio'
 request = require 'request'
 express = require 'express'
 NodeCache = require 'node-cache'
+fs = require 'fs'
 
 app = express()
 cache = new NodeCache()
@@ -76,23 +77,52 @@ get_data = ->
             #console.log "cache"
             f values
 
+# get a pet that was not posted yet
+get_notPostedPet = ->
+    new Promise (f, r) ->
+        filename = 'posted_pets.json'
+        try
+            if fs.existsSync(filename)
+                postedPets = JSON.parse fs.readFileSync filename, 'utf8'
+            else
+                fs.writeFileSync filename, JSON.stringify []
+                postedPets = []
+        catch err
+            console.error err
+            r err
+        get_data().then (pets) ->
+            notPostedPets = []
+            for pet in pets
+                if pet.id not in postedPets
+                    notPostedPets.push pet
+            if notPostedPets.length is 0
+                notPostedPets = pets
+                postedPets = []
+            random = Math.ceil Math.random()*notPostedPets.length-1
+            notPostedPet = notPostedPets[random]
+            postedPets.push notPostedPet.id
+            fs.writeFileSync filename, JSON.stringify postedPets
+            f notPostedPet
+
 ###
 get_data().then (values) ->
     console.log values
+
+get_notPostedPet().then (pet) ->
+    console.log pet
 ###
 
 # Return all pets
 app.get '/', (req, rep) ->
-    get_data().then (values) ->
+    get_data().then (pets) ->
         #console.log values
-        rep.json values
+        rep.json pets
 
 # Return a random pet
 app.get '/random', (req, rep) ->
-    get_data().then (values) ->
-        random = Math.ceil Math.random()*values.length-1
-        #console.log random
-        rep.json values[random]
+    get_notPostedPet().then (pet) ->
+        #console.log pet
+        rep.json pet
 
 server = app.listen 3000, 'localhost', ->
     host = server.address().address
