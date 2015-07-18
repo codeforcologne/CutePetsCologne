@@ -8,8 +8,8 @@
 # Description:       CutePetsChemnitz API
 ### END INIT INFO
 
-SCRIPT=$HOME/iojs-v2.3.4-linux-armv6l/bin/node /opt/CutePetsChemnitz/API/lib/scraper.js
-RUNAS=pi
+SCRIPT="/home/pi/iojs-v2.3.4-linux-armv6l/bin/node /opt/CutePetsChemnitz/API/lib/scraper.js"
+RUNAS=root
 NAME=petschemnitzapi
 
 PIDFILE=/var/run/$NAME.pid
