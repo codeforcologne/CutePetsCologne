@@ -86,7 +86,7 @@ rake
 #### Deploy
 Adding a cronjob:
 ```
-0 9-21/2 * * * root cd /opt/CutePetsChemnitz && rake
+5 9-22/2 * * * root cd /opt/CutePetsChemnitz && rake
 ```
 
 
