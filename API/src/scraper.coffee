@@ -10,6 +10,7 @@ tierheim_url = "http://www.tierfreunde-helfen.de/index.php?zuhausegesucht-tiere-
 splitpos = tierheim_url.lastIndexOf '/'
 base_url = tierheim_url.slice 0, splitpos+1
 
+# Get details for one pet
 get_details = (url)->
     new Promise (f, r) ->
         request url, (err, response, body) ->
@@ -38,6 +39,7 @@ get_details = (url)->
                     .trim()
             f details
 
+# Get all urls for pets
 get_detailUrls = (url) ->
     new Promise (f, r) ->
         request url, (err, response, body) ->
@@ -54,6 +56,8 @@ get_detailUrls = (url) ->
                 return
             f urls
 
+# Get the data from cache or save data in cache if data is none
+# cache lifetime: 24h
 get_data = ->
     new Promise (f, r) ->
         values = cache.get('tiere')
@@ -77,11 +81,13 @@ get_data().then (values) ->
     console.log values
 ###
 
+# Return all pets
 app.get '/', (req, rep) ->
     get_data().then (values) ->
         #console.log values
         rep.json values
 
+# Return a random pet
 app.get '/random', (req, rep) ->
     get_data().then (values) ->
         random = Math.ceil Math.random()*values.length-1
