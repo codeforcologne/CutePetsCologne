@@ -64,12 +64,12 @@ get_data = ->
                     for url in urls
                         p.push get_details url
                     Promise.all p
-                .catch (err)
+                .catch (err) ->
                     r err
                 .then (values) ->
                     cache.set('tiere', values, 60*60*24)
                     f values
-                .catch err
+                .catch err ->
                     r err
         else
             f values
@@ -115,7 +115,7 @@ app.get '/', (req, res) ->
             res.json pets
         .catch (err) ->
             console.error err
-            res.status(500).json(err);
+            res.status(500).json(err)
 
 # Return a random pet
 app.get '/random', (req, res) ->
@@ -124,7 +124,7 @@ app.get '/random', (req, res) ->
             res.json pet
         .catch (err) ->
             console.error err
-            res.status(500).json(err);
+            res.status(500).json(err)
 
 server = app.listen 3000, 'localhost', ->
     host = server.address().address
