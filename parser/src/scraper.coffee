@@ -1,6 +1,5 @@
 cheerio = require 'cheerio'
 request = require 'request'
-Promise = require 'promise'
 
 tierheim_url = "http://www.tierfreunde-helfen.de/index.php?zuhausegesucht-tiere-in-not"
 splitpos = tierheim_url.lastIndexOf '/'
@@ -46,3 +45,5 @@ get_detailUrls tierheim_url
     Promise.all p
   .then (values) ->
     console.log values
+  .catch (err) ->
+    console.error err
