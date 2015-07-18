@@ -59,6 +59,7 @@ node lib/scraper.js
 ```
 sudo ln -s /opt/CutePetsChemnitz/API/petschemnitz /etc/init.d
 sudo update-rc.d petschemnitz defaults
+sudo mkdir /var/cache/petschemnitz
 sudo service petschemnitz start
 ```
 
