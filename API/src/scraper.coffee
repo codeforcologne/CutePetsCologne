@@ -8,9 +8,8 @@ _ = require 'underscore'
 app = express()
 cache = new NodeCache()
 
-tierfreunde_url = "http://www.tierfreunde-helfen.de/index.php?zuhausegesucht-tiere-in-not"
-tierfreunde_splitpos = tierfreunde_url.lastIndexOf '/'
-tierfreunde_base_url = tierfreunde_url.slice 0, tierfreunde_splitpos+1
+tierfreunde_url = "http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html"
+tierfreunde_base_url = "http://www.tierheim-koeln-zollstock.de/"
 
 tierschutz_url = "http://www.tierschutz-chemnitz.de/vm_hunde.php"
 tierschutz_splitpos = tierschutz_url.lastIndexOf '/'
@@ -22,20 +21,19 @@ get_tierfreunde = (url)->
             if err
                 r err
             $ = cheerio.load body
-            content = $('#content')
+            content = $('.animalDetail')
             name = content.find('h1').text()
             img = content.find('img').attr('src')
             pic = tierfreunde_base_url + content.find('img').attr('src')
-            id = img.split '.', 1
-            id = id[0].split '/'
+            id = content.find('h1').attr('id')
             content.find('h1').remove()
             content.find('a').remove()
             details =
-                id: id[-1..][0]
+                id: id
                 pic: encodeURI pic
                 name: name
                 link: url
-                desc: content
+                desc: content.find('.animalDescription p')
                     .text().replace(/\n/g, '')
                     .replace(/\r/g, '')
                     .replace(/\t/g, '')
@@ -49,9 +47,10 @@ get_tierfreundeUrls = (url) ->
                 r err
             urls = []
             $ = cheerio.load body
-            $('.teaser-subline').each ->
+            $('.animalOverviewItem').each ->
                 elem = $(this)
-                detail_url = tierfreunde_base_url + elem.find('.teaser-image').find('a').attr('href')
+                detail_url = tierfreunde_base_url + elem.find('.more').attr('href')
+                console.log(detail_url)
                 urls.push detail_url
             f urls
 
@@ -131,17 +130,18 @@ get_tierschutzdata = ->
 
 get_data = ->
     new Promise (f ,r) ->
-        values = cache.get('tiere')
-        if not values
-            Promise.all [get_tierschutzdata(), get_tierfreundedata()]
+        #values = cache.get('tiere')
+        #if not values
+            #Promise.all [get_tierschutzdata(), get_tierfreundedata()]
+            Promise.all [ get_tierfreundedata()]
                 .then (list_of_values) ->
                     values = _.union.apply null, list_of_values
                     cache.set('tiere', values, 60*60*24)
                     f values
                 .catch (err) ->
                     r err
-        else
-            f values
+        #else
+        #    f values
 
 # get a pet that was not posted yet
 get_notPostedPet = ->
