@@ -9,13 +9,16 @@ app = express()
 cache = new NodeCache()
 
 tierfreunde_url = "http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html"
+zollstock_urls = ["http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html",
+              "http://www.tierheim-koeln-zollstock.de/tiervermittlung/hunde.html",
+              "http://www.tierheim-koeln-zollstock.de/tiervermittlung/nagetiere.html"];
 tierfreunde_base_url = "http://www.tierheim-koeln-zollstock.de/"
 
 tierschutz_url = "http://www.tierschutz-chemnitz.de/vm_hunde.php"
 tierschutz_splitpos = tierschutz_url.lastIndexOf '/'
 tierschutz_base_url = tierschutz_url.slice 0, tierschutz_splitpos+1
 
-get_tierfreunde = (url)->
+get_zollstock_tier = (url)->
     new Promise (f, r) ->
         request url, (err, response, body) ->
             if err
@@ -23,8 +26,8 @@ get_tierfreunde = (url)->
             $ = cheerio.load body
             content = $('.animalDetail')
             name = content.find('h1').text()
-            img = content.find('img').attr('src')
-            pic = tierfreunde_base_url + content.find('img').attr('src')
+            img = content.find('.lightbox-image').attr('href')
+            pic = tierfreunde_base_url + img
             id = content.find('h1').attr('id')
             content.find('h1').remove()
             content.find('a').remove()
@@ -40,7 +43,7 @@ get_tierfreunde = (url)->
                     .trim()
             f details
 
-get_tierfreundeUrls = (url) ->
+get_zollstock_urls = (url) ->
     new Promise (f, r) ->
         request url, (err, response, body) ->
             if err
@@ -102,18 +105,18 @@ get_tierschutzUrls = (url) ->
                         urls.push detail_url
             f urls
 
-get_tierfreundedata = ->
+get_zollstockdata = (tier_url)->
     new Promise (f, r) ->
-        get_tierfreundeUrls tierfreunde_url
-            .then (urls) ->
-                p = []
-                for url in urls
-                    p.push get_tierfreunde url
-                Promise.all p
-            .then (values) ->
-                f values
-            .catch (err) ->
-                r err
+          get_zollstock_urls tier_url
+              .then (urls) ->
+                  p = []
+                  for url in urls
+                      p.push get_zollstock_tier url
+                  Promise.all p
+              .then (values) ->
+                  f values
+              .catch (err) ->
+                  r err
 
 get_tierschutzdata = ->
     new Promise (f, r) ->
@@ -133,7 +136,11 @@ get_data = ->
         #values = cache.get('tiere')
         #if not values
             #Promise.all [get_tierschutzdata(), get_tierfreundedata()]
-            Promise.all [ get_tierfreundedata()]
+            #Promise.all [ get_tierfreundedata()]
+            p = []
+            for url in zollstock_urls
+                p.push get_zollstockdata url
+            Promise.all p
                 .then (list_of_values) ->
                     values = _.union.apply null, list_of_values
                     cache.set('tiere', values, 60*60*24)
