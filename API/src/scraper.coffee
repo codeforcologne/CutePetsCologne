@@ -63,7 +63,7 @@ get_zollstock_urls = (url) ->
 
 get_dellbrueck_tier = (url)->
     new Promise (f, r) ->
-        console.log(url)
+        #console.log('\n' + url + '\n')
         request url, (err, response, body) ->
             if err
                 r err
@@ -102,23 +102,54 @@ get_dellbrueck_sub_urls = (url) ->
                 sub_urls.push detail_url
             f sub_urls
 
+get_dellbrueck_urls_for_page = (sub_url) ->
+  new Promise (f, r) ->
+    request sub_url, (err, response, body) ->
+        if err
+            r err
+      #  console.log(sub_url)
+        urls = []
+        $ = cheerio.load body
+        $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
+            elem = $(this)
+            detail_url = dellbrueck_base_url + elem.attr('href')
+            #console.log(detail_url)
+            urls.push detail_url
+
+        #console.log(urls.length)
+        f urls
+
+
 get_dellbrueck_urls = (url) ->
     new Promise (f, r) ->
             urls = []
+            p = []
             get_dellbrueck_sub_urls url
                 .then (sub_urls) ->
                     for sub_url in sub_urls
-                      request sub_url, (err, response, body) ->
-                          if err
-                              r err
-                        #  console.log(sub_url)
-                          $ = cheerio.load body
-                          $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
-                              elem = $(this)
-                              detail_url = dellbrueck_base_url + elem.attr('href')
-                              urls.push detail_url
-                              console.log(detail_url)
-              f urls
+                      p.push get_dellbrueck_urls_for_page sub_url
+                    Promise.all p
+                      .then (tier_urls) ->
+                        console.log(tier_urls.length)
+                        for tier_url in tier_urls
+                          console.log(tier_url)
+                          urls.push tier_url
+                  .then () ->
+                    f urls
+                  #    new Promise (f, r) ->
+                  #      request sub_url, (err, response, body) ->
+                  #          if err
+                  #              r err
+                  #          console.log(sub_url)
+                  #          $ = cheerio.load body
+                  #          $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
+                  #              elem = $(this)
+                  #              detail_url = dellbrueck_base_url + elem.attr('href')
+                  #              console.log(detail_url)
+                  #              urls.push detail_url
+              #  .then () ->
+                #  console.log(urls.length)
+                #  f urls
 
 get_zollstockdata = (tier_url)->
     new Promise (f, r) ->
@@ -143,10 +174,10 @@ get_dellbrueckdata = (tier_url)->
                   for url in urls
                       p.push get_dellbrueck_tier url
                   Promise.all p
-              .then (values) ->
-                  f values
-              .catch (err) ->
-                  r err
+                    .then (values) ->
+                        f values
+                    .catch (err) ->
+                        r err
 
 get_data = ->
     new Promise (f ,r) ->
