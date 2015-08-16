@@ -8,15 +8,19 @@ _ = require 'underscore'
 app = express()
 cache = new NodeCache()
 
-tierfreunde_url = "http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html"
 zollstock_urls = ["http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/hunde.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/nagetiere.html"];
-tierfreunde_base_url = "http://www.tierheim-koeln-zollstock.de/"
+zollstock_base_url = "http://www.tierheim-koeln-zollstock.de/"
 
-tierschutz_url = "http://www.tierschutz-chemnitz.de/vm_hunde.php"
-tierschutz_splitpos = tierschutz_url.lastIndexOf '/'
-tierschutz_base_url = tierschutz_url.slice 0, tierschutz_splitpos+1
+dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+kleine+Hunde+&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung++mittelgro%DFe+Hunde+&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+Katzen&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BKaninchen&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BMeerschweinchen&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln2_d620d9faeeb43f717c893b5c818f1287&f_bereich=Degus%2Bund%2BChinchillas&f_funktion=Uebersicht"];
+dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
 
 get_zollstock_tier = (url)->
     new Promise (f, r) ->
@@ -27,7 +31,7 @@ get_zollstock_tier = (url)->
             content = $('.animalDetail')
             name = content.find('h1').text()
             img = content.find('.lightbox-image').attr('href')
-            pic = tierfreunde_base_url + img
+            pic = zollstock_base_url + img
             id = content.find('h1').attr('id')
             content.find('h1').remove()
             content.find('a').remove()
@@ -52,58 +56,69 @@ get_zollstock_urls = (url) ->
             $ = cheerio.load body
             $('.animalOverviewItem').each ->
                 elem = $(this)
-                detail_url = tierfreunde_base_url + elem.find('.more').attr('href')
+                detail_url = zollstock_base_url + elem.find('.more').attr('href')
                 console.log(detail_url)
                 urls.push detail_url
             f urls
 
-get_tierschutz = (url) ->
+get_dellbrueck_tier = (url)->
     new Promise (f, r) ->
+        console.log(url)
         request url, (err, response, body) ->
             if err
                 r err
             $ = cheerio.load body
-            content = $('table')
-            name = content.find('.Stil2').text().replace /"/g, ''
-            img = content.find('img').attr('src')
-            pic = tierschutz_base_url + 'vermittlung/' + content.find('img').attr('src')
-            id = img.split '.', 1
-            id = id[0].split '/'
-            content.find('.Stil2').remove()
-            content.find('p').first().remove()
-            content.find('p').last().remove()
-            content.find('p').each ->
-                elem = $(this)
-                elem.remove() if elem.text().trim().split(/\s+/).length < 10
-                elem.remove() if /^-/.test elem.text().trim()
+            content = $('p[style="font-family:Verdana;font-size:13px;font-style:normal;font-weight:normal;color:#756d58;vertical-align:top"]')
+            name = content.find('b').text()
+            img = $('#bild_0').attr('src')
+            pic = zollstock_base_url + img
+            start = url.indexOf("&f_aktueller_ds=");
+            id = url.substr(start+16);
+            end = id.indexOf("&");
+            id = url.substr(0, end);
+            content.find('b').remove()
             details =
-                id: id[-1..][0]
+                id: id
                 pic: encodeURI pic
                 name: name
                 link: url
-                desc: content.find('.Stil1')
+                desc: content
                     .text().replace(/\n/g, '')
                     .replace(/\r/g, '')
                     .replace(/\t/g, '')
                     .trim()
             f details
 
-get_tierschutzUrls = (url) ->
+get_dellbrueck_sub_urls = (url) ->
     new Promise (f, r) ->
         request url, (err, response, body) ->
             if err
-                console.error err
                 r err
-            urls = []
+            sub_urls = []
             $ = cheerio.load body
-            $('td', '#center').each ->
+            $('a#TextSeitenanzeige').each ->
                 elem = $(this)
-                if elem.attr 'colspan' is undefined
-                    href = elem.find('a').attr('href')
-                    if href isnt undefined and /^vermittlung/.test href
-                        detail_url = tierschutz_base_url + href
-                        urls.push detail_url
-            f urls
+                detail_url = dellbrueck_base_url + elem.attr('href')
+                sub_urls.push detail_url
+            f sub_urls
+
+get_dellbrueck_urls = (url) ->
+    new Promise (f, r) ->
+            urls = []
+            get_dellbrueck_sub_urls url
+                .then (sub_urls) ->
+                    for sub_url in sub_urls
+                      request sub_url, (err, response, body) ->
+                          if err
+                              r err
+                        #  console.log(sub_url)
+                          $ = cheerio.load body
+                          $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
+                              elem = $(this)
+                              detail_url = dellbrueck_base_url + elem.attr('href')
+                              urls.push detail_url
+                              console.log(detail_url)
+              f urls
 
 get_zollstockdata = (tier_url)->
     new Promise (f, r) ->
@@ -111,6 +126,7 @@ get_zollstockdata = (tier_url)->
               .then (urls) ->
                   p = []
                   for url in urls
+                      console.log(url)
                       p.push get_zollstock_tier url
                   Promise.all p
               .then (values) ->
@@ -118,18 +134,19 @@ get_zollstockdata = (tier_url)->
               .catch (err) ->
                   r err
 
-get_tierschutzdata = ->
+get_dellbrueckdata = (tier_url)->
     new Promise (f, r) ->
-        get_tierschutzUrls tierschutz_url
-            .then (urls) ->
-                p = []
-                for url in urls
-                    p.push get_tierschutz url
-                Promise.all p
-            .then (values) ->
-                f values
-            .catch (err) ->
-                r err
+          get_dellbrueck_urls tier_url
+              .then (urls) ->
+                  console.log(urls.length)
+                  p = []
+                  for url in urls
+                      p.push get_dellbrueck_tier url
+                  Promise.all p
+              .then (values) ->
+                  f values
+              .catch (err) ->
+                  r err
 
 get_data = ->
     new Promise (f ,r) ->
@@ -138,8 +155,17 @@ get_data = ->
             #Promise.all [get_tierschutzdata(), get_tierfreundedata()]
             #Promise.all [ get_tierfreundedata()]
             p = []
-            for url in zollstock_urls
-                p.push get_zollstockdata url
+          #  p2 = []
+          #  for url in dellbrueck_urls
+          #      p2.push get_dellbrueck_sub_urls url
+          #  Promise.all p2
+          #    .then (sub_urls) ->
+          #      for sub_url in sub_urls
+          #          p.push get_dellbrueckdata sub_url
+          #  for url in zollstock_urls
+          #      p.push get_zollstockdata url
+            for url in dellbrueck_urls
+                p.push get_dellbrueckdata url
             Promise.all p
                 .then (list_of_values) ->
                     values = _.union.apply null, list_of_values
