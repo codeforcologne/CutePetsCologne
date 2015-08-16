@@ -21,6 +21,7 @@ dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BMeerschweinchen&f_funktion=Uebersicht",
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln2_d620d9faeeb43f717c893b5c818f1287&f_bereich=Degus%2Bund%2BChinchillas&f_funktion=Uebersicht"];
 dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
+dellbrueck_pic_url = "http://presenter.comedius.de/pic/bmt_koeln_d620d9faeeb43f717c893b5c818f1287"
 
 get_zollstock_tier = (url)->
     new Promise (f, r) ->
@@ -68,14 +69,17 @@ get_dellbrueck_tier = (url)->
             if err
                 r err
             $ = cheerio.load body
-            content = $('p[style="font-family:Verdana;font-size:13px;font-style:normal;font-weight:normal;color:#756d58;vertical-align:top"]')
-            name = content.find('b').text()
+            content = $('p[style="font-family:Verdana;font-size:13px;font-style:normal;font-weight:normal;color:#756d58;vertical-align:top"]').first()
+            name = content.find('b').first().text()
             img = $('#bild_0').attr('src')
-            pic = zollstock_base_url + img
-            start = url.indexOf("&f_aktueller_ds=");
-            id = url.substr(start+16);
-            end = id.indexOf("&");
-            id = url.substr(0, end);
+            pic = ""
+            if (img)
+              start = img.lastIndexOf("/")
+              pic = dellbrueck_pic_url + img.substr(start)
+            start = url.indexOf("&f_aktueller_ds=")
+            id = url.substr(start+16)
+            end = id.indexOf("&")
+            id = id.substr(0, end)
             content.find('b').remove()
             details =
                 id: id
@@ -83,10 +87,15 @@ get_dellbrueck_tier = (url)->
                 name: name
                 link: url
                 desc: content
-                    .text().replace(/\n/g, '')
-                    .replace(/\r/g, '')
-                    .replace(/\t/g, '')
-                    .trim()
+                      .contents()
+                      #.find()
+                      .not('b')
+                      .not('form')
+                      .text()
+                      .replace(/\n/g, ' ')
+                      .replace(/\r/g, ' ')
+                      .replace(/\t/g, ' ')
+                      .trim()
             f details
 
 get_dellbrueck_sub_urls = (url) ->
