@@ -133,7 +133,9 @@ get_dellbrueck_urls = (url) ->
                         console.log(tier_urls.length)
                         for tier_url in tier_urls
                           console.log(tier_url)
-                          urls.push tier_url
+                          for animal in tier_url
+                            console.log(animal)
+                            urls.push animal
                   .then () ->
                     f urls
                   #    new Promise (f, r) ->
