@@ -2,6 +2,7 @@ cheerio = require 'cheerio'
 request = require 'request'
 express = require 'express'
 NodeCache = require 'node-cache'
+iconvlite = require 'iconv-lite'
 fs = require 'fs'
 _ = require 'underscore'
 
@@ -22,6 +23,8 @@ dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln2_d620d9faeeb43f717c893b5c818f1287&f_bereich=Degus%2Bund%2BChinchillas&f_funktion=Uebersicht"];
 dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
 dellbrueck_pic_url = "http://presenter.comedius.de/pic/bmt_koeln_d620d9faeeb43f717c893b5c818f1287"
+
+
 
 get_zollstock_tier = (url)->
     new Promise (f, r) ->
@@ -65,9 +68,10 @@ get_zollstock_urls = (url) ->
 get_dellbrueck_tier = (url)->
     new Promise (f, r) ->
         #console.log('\n' + url + '\n')
-        request url, (err, response, body) ->
+        request (uri: url, encoding: "ISO-8859-1"), (err, response, body) ->
             if err
                 r err
+          #  body = iconvlite.decode(body, "ISO-8859-1")
             $ = cheerio.load body
             content = $('p[style="font-family:Verdana;font-size:13px;font-style:normal;font-weight:normal;color:#756d58;vertical-align:top"]').first()
             name = content.find('b').first().text()
@@ -88,7 +92,6 @@ get_dellbrueck_tier = (url)->
                 link: url
                 desc: content
                       .contents()
-                      #.find()
                       .not('b')
                       .not('form')
                       .text()
@@ -197,6 +200,7 @@ get_data = ->
             #Promise.all [get_tierschutzdata(), get_tierfreundedata()]
             #Promise.all [ get_tierfreundedata()]
             p = []
+            iconvlite.extendNodeEncodings()
           #  p2 = []
           #  for url in dellbrueck_urls
           #      p2.push get_dellbrueck_sub_urls url
@@ -204,8 +208,8 @@ get_data = ->
           #    .then (sub_urls) ->
           #      for sub_url in sub_urls
           #          p.push get_dellbrueckdata sub_url
-          #  for url in zollstock_urls
-          #      p.push get_zollstockdata url
+            for url in zollstock_urls
+                p.push get_zollstockdata url
             for url in dellbrueck_urls
                 p.push get_dellbrueckdata url
             Promise.all p
