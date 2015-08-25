@@ -12,13 +12,11 @@ cache = new NodeCache()
 zollstock_urls = ["http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/hunde.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/nagetiere.html"];
-zollstock_base_url = "http://www.tierheim-koeln-zollstock.de/"
+zollstock_base_url = "http://www.tierheim-koeln-zollstock.de"
 
+# Mittelgrosse Hunde, Katzen und Kaninchen gehen aktuell nicht :(
 dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+kleine+Hunde+&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung++mittelgro%DFe+Hunde+&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+Katzen&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BKaninchen&f_funktion=Uebersicht",
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",             
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BMeerschweinchen&f_funktion=Uebersicht",
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln2_d620d9faeeb43f717c893b5c818f1287&f_bereich=Degus%2Bund%2BChinchillas&f_funktion=Uebersicht"];
 dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
@@ -150,20 +148,6 @@ get_dellbrueck_urls = (url) ->
                             urls.push animal
                   .then () ->
                     f urls
-                  #    new Promise (f, r) ->
-                  #      request sub_url, (err, response, body) ->
-                  #          if err
-                  #              r err
-                  #          console.log(sub_url)
-                  #          $ = cheerio.load body
-                  #          $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
-                  #              elem = $(this)
-                  #              detail_url = dellbrueck_base_url + elem.attr('href')
-                  #              console.log(detail_url)
-                  #              urls.push detail_url
-              #  .then () ->
-                #  console.log(urls.length)
-                #  f urls
 
 get_zollstockdata = (tier_url)->
     new Promise (f, r) ->
@@ -201,13 +185,6 @@ get_data = ->
             #Promise.all [ get_tierfreundedata()]
             p = []
             iconvlite.extendNodeEncodings()
-          #  p2 = []
-          #  for url in dellbrueck_urls
-          #      p2.push get_dellbrueck_sub_urls url
-          #  Promise.all p2
-          #    .then (sub_urls) ->
-          #      for sub_url in sub_urls
-          #          p.push get_dellbrueckdata sub_url
             for url in zollstock_urls
                 p.push get_zollstockdata url
             for url in dellbrueck_urls
@@ -279,3 +256,4 @@ server = app.listen 3000, 'localhost', ->
     port = server.address().port
     console.log 'Listening at http://%s:%s', host, port
 ###
+
