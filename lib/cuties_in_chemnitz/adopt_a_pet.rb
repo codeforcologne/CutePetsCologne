@@ -12,6 +12,15 @@ class AdoptAPet
 
   private
   def self.fetch_pet
-    Pet.new(JSON.parse(Net::HTTP.get_response(URI.parse(URL)).body.sample))
+    json = JSON.parse(Net::HTTP.get_response(URI.parse(URL)).body)
+    puts json.first
+    data = {}
+    json.count.times do |p|
+      data = json.sample
+      if not data[:desc].nil?
+        break
+      end
+    end
+    Pet.new(data)
   end
 end
