@@ -17,7 +17,7 @@ class AdoptAPet
     data = {}
     json.count.times do |p|
       data = json.sample
-      if not data[:desc].nil?
+      if not data[:desc].nil? && data[:pic].nil?
         break
       end
     end

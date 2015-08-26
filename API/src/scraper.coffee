@@ -43,8 +43,7 @@ get_zollstock_tier = (url)->
                 name: name
                 link: url
                 desc: content.find('.animalDescription p')
-                    .text().replace(/\n+/g, '. ')
-                    .replace(/\r+/g, '. ')
+                    .text().trim().replace(/[\r|\n]+/g, '. ')
                     .replace(/\t+/g, ' ')
                     .trim()
             f details
@@ -92,9 +91,8 @@ get_dellbrueck_tier = (url)->
                       .contents()
                       .not('b')
                       .not('form')
-                      .text()
-                      .replace(/\n+/g, '. ')
-                      .replace(/\r+/g, '. ')
+                      .text().trim()
+                      .replace(/[\r|\n]+/g, '. ')
                       .replace(/\t+/g, ' ')
                       .trim()
             f details
