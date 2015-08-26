@@ -31,9 +31,9 @@ get_zollstock_tier = (url)->
                 r err
             $ = cheerio.load body
             content = $('.animalDetail')
-            name = content.find('h1').text()
+            name = content.find('h1').first().text()
             img = content.find('.lightbox-image').attr('href')
-            pic = zollstock_base_url + img
+            pic = zollstock_base_url + '/' + img
             id = content.find('h1').attr('id')
             content.find('h1').remove()
             content.find('a').remove()
@@ -43,9 +43,9 @@ get_zollstock_tier = (url)->
                 name: name
                 link: url
                 desc: content.find('.animalDescription p')
-                    .text().replace(/\n/g, '')
-                    .replace(/\r/g, '')
-                    .replace(/\t/g, '')
+                    .text().replace(/\n+/g, '. ')
+                    .replace(/\r+/g, '. ')
+                    .replace(/\t+/g, ' ')
                     .trim()
             f details
 
@@ -93,9 +93,9 @@ get_dellbrueck_tier = (url)->
                       .not('b')
                       .not('form')
                       .text()
-                      .replace(/\n/g, ' ')
-                      .replace(/\r/g, ' ')
-                      .replace(/\t/g, ' ')
+                      .replace(/\n+/g, '. ')
+                      .replace(/\r+/g, '. ')
+                      .replace(/\t+/g, ' ')
                       .trim()
             f details
 
