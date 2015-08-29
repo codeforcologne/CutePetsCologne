@@ -9,16 +9,16 @@ _ = require 'underscore'
 app = express()
 cache = new NodeCache()
 
+# Zollstock
 zollstock_urls = ["http://www.tierheim-koeln-zollstock.de/tiervermittlung/katzen.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/hunde.html",
               "http://www.tierheim-koeln-zollstock.de/tiervermittlung/nagetiere.html"];
 zollstock_base_url = "http://www.tierheim-koeln-zollstock.de"
 
-# Mittelgrosse Hunde, Katzen und Kaninchen gehen aktuell nicht :(
+#Dellbrück
 dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+kleine+Hunde+&f_funktion=Uebersicht",
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",             
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung%2BMeerschweinchen&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln2_d620d9faeeb43f717c893b5c818f1287&f_bereich=Degus%2Bund%2BChinchillas&f_funktion=Uebersicht"];
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+Katzen&f_funktion=Uebersicht"];
 dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
 dellbrueck_pic_url = "http://presenter.comedius.de/pic/bmt_koeln_d620d9faeeb43f717c893b5c818f1287"
 
@@ -64,11 +64,9 @@ get_zollstock_urls = (url) ->
 
 get_dellbrueck_tier = (url)->
     new Promise (f, r) ->
-        #console.log('\n' + url + '\n')
         request (uri: url, encoding: "ISO-8859-1"), (err, response, body) ->
             if err
                 r err
-          #  body = iconvlite.decode(body, "ISO-8859-1")
             $ = cheerio.load body
             content = $('p[style="font-family:Verdana;font-size:13px;font-style:normal;font-weight:normal;color:#756d58;vertical-align:top"]').first()
             name = content.find('b').first().text()
@@ -115,16 +113,12 @@ get_dellbrueck_urls_for_page = (sub_url) ->
     request sub_url, (err, response, body) ->
         if err
             r err
-      #  console.log(sub_url)
         urls = []
         $ = cheerio.load body
         $('a[style="border-style:none;background-color:#ece9e2;vertical-align:top;font:normal 13px Verdana; color:#756d58"]').each ->
             elem = $(this)
             detail_url = dellbrueck_base_url + elem.attr('href')
-            #console.log(detail_url)
             urls.push detail_url
-
-        #console.log(urls.length)
         f urls
 
 
@@ -137,13 +131,10 @@ get_dellbrueck_urls = (url) ->
                     for sub_url in sub_urls
                       p.push get_dellbrueck_urls_for_page sub_url
                     Promise.all p
-                      .then (tier_urls) ->
-                        console.log(tier_urls.length)
-                        for tier_url in tier_urls
-                          console.log(tier_url)
-                          for animal in tier_url
-                            console.log(animal)
-                            urls.push animal
+                      .then (page_urls) ->
+                        for page_url in page_urls
+                          for animal_url in page_url
+                            urls.push animal_url
                   .then () ->
                     f urls
 
@@ -165,9 +156,9 @@ get_dellbrueckdata = (tier_url)->
     new Promise (f, r) ->
           get_dellbrueck_urls tier_url
               .then (urls) ->
-                  console.log(urls.length)
                   p = []
                   for url in urls
+                      console.log(url)
                       p.push get_dellbrueck_tier url
                   Promise.all p
                     .then (values) ->
@@ -176,37 +167,32 @@ get_dellbrueckdata = (tier_url)->
                         r err
 
 get_data = ->
-    new Promise (f ,r) ->
-        #values = cache.get('tiere')
-        #if not values
-            #Promise.all [get_tierschutzdata(), get_tierfreundedata()]
-            #Promise.all [ get_tierfreundedata()]
-            p = []
-            iconvlite.extendNodeEncodings()
-            for url in zollstock_urls
-                p.push get_zollstockdata url
-            for url in dellbrueck_urls
-                p.push get_dellbrueckdata url
-            Promise.all p
-                .then (list_of_values) ->
-                    values = _.union.apply null, list_of_values
-                    cache.set('tiere', values, 60*60*24)
-                    f values
-                .catch (err) ->
-                    r err
-        #else
-        #    f values
+    new Promise (f ,r) ->        
+          p = []
+          iconvlite.extendNodeEncodings()
+          for url in zollstock_urls
+              p.push get_zollstockdata url
+          for url in dellbrueck_urls
+              p.push get_dellbrueckdata url
+          Promise.all p
+              .then (list_of_values) ->
+                  values = _.union.apply null, list_of_values
+                  cache.set('tiere', values, 60*60*24)
+                  f values
+              .catch (err) ->
+                  r err
 
 # get a pet that was not posted yet
 get_notPostedPet = ->
     new Promise (f, r) ->
-        filename = '/var/cache/petschemnitz/posted_pets.json'
+        filename = 'posted_pets.json'
         try
             if fs.existsSync(filename)
                 postedPets = JSON.parse fs.readFileSync filename, 'utf8'
             else
                 fs.writeFileSync filename, JSON.stringify []
                 postedPets = []
+                console.log('file does not exist')
         catch err
             r err
         get_data().then (pets) ->
