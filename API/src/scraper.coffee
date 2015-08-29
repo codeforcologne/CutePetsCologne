@@ -185,7 +185,7 @@ get_data = ->
 # get a pet that was not posted yet
 get_notPostedPet = ->
     new Promise (f, r) ->
-        filename = 'posted_pets.json'
+        filename = '/var/cache/petschemnitz/posted_pets.json'
         try
             if fs.existsSync(filename)
                 postedPets = JSON.parse fs.readFileSync filename, 'utf8'
