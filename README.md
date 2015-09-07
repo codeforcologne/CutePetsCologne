@@ -59,7 +59,7 @@ node lib/scraper.js
 
 #### Deploy
 ```
-sudo ln -s /$path/CutePetsCologne/API/petschemnitz /etc/init.d
+sudo ln -s /$path/CutePetsCologne/API/petscologne /etc/init.d
 sudo update-rc.d petscologne defaults
 sudo mkdir /var/cache/petscologne
 sudo service petscologne start
