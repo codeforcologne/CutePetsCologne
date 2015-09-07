@@ -17,7 +17,7 @@ zollstock_base_url = "http://www.tierheim-koeln-zollstock.de"
 
 #Dellbrück
 dellbrueck_urls = ["http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+kleine+Hunde+&f_funktion=Uebersicht",
-              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",             
+              "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+gro%DFe+Hunde+&f_funktion=Uebersicht",
               "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php?f_mandant=bmt_koeln_d620d9faeeb43f717c893b5c818f1287&f_bereich=Vermittlung+Katzen&f_funktion=Uebersicht"];
 dellbrueck_base_url = "http://presenter.comedius.de/design/bmt_koeln_standard_10001.php"
 dellbrueck_pic_url = "http://presenter.comedius.de/pic/bmt_koeln_d620d9faeeb43f717c893b5c818f1287"
@@ -167,7 +167,7 @@ get_dellbrueckdata = (tier_url)->
                         r err
 
 get_data = ->
-    new Promise (f ,r) ->        
+    new Promise (f ,r) ->
           p = []
           iconvlite.extendNodeEncodings()
           for url in zollstock_urls
@@ -185,7 +185,7 @@ get_data = ->
 # get a pet that was not posted yet
 get_notPostedPet = ->
     new Promise (f, r) ->
-        filename = '/var/cache/petschemnitz/posted_pets.json'
+        filename = '/var/cache/petscologne/posted_pets.json'
         try
             if fs.existsSync(filename)
                 postedPets = JSON.parse fs.readFileSync filename, 'utf8'
@@ -240,4 +240,3 @@ server = app.listen 3000, 'localhost', ->
     port = server.address().port
     console.log 'Listening at http://%s:%s', host, port
 ###
-

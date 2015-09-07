@@ -1,7 +1,7 @@
 {
   "name": "parser",
   "version": "0.0.1",
-  "description": "parse tierasyl-chemnitz.de",
+  "description": "parse websites of animal shelters in Cologne",
   "main": "lib/scraper.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

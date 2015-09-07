@@ -1,16 +1,16 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          petschemnitzapi
+# Provides:          petscologneapi
 # Required-Start:    $local_fs $network $named $time $syslog
 # Required-Stop:     $local_fs $network $named $time $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Description:       CutePetsChemnitz API
+# Description:       CutePetsCologne API
 ### END INIT INFO
 
 SCRIPT="/usr/bin/node /root/CutePetsCologne/API/lib/scraper.js"
 RUNAS=root
-NAME=petschemnitzapi
+NAME=petscologneapi
 
 PIDFILE=/var/run/$NAME.pid
 LOGFILE=/var/log/$NAME.log

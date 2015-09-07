@@ -1,0 +1,5 @@
+require_relative 'extensions/string'
+require_relative 'cuties_in_cologne/twit'
+require_relative 'cuties_in_cologne/pet'
+require_relative 'cuties_in_cologne/adopt_a_pet'
+require_relative 'cuties_in_cologne/greeting'

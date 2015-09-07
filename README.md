@@ -1,29 +1,30 @@
-# CutePetsChemnitz
+# CutePetsCologne
 
-Post an random pet from shelter [Chemnitz (OT Röhrsdorf)](http://www.tierfreunde-helfen.de/) on Twitter [@petschemnitz](https://twitter.com/petschemnitz)
+Post an random pet from shelters [Zollstock](http://www.tierheim-koeln-zollstock.de/) and [Dellbrück](http://www.tierheim-koeln-dellbrueck.de/) on Twitter [@CutePetsCologne](https://twitter.com/CutePetsCologne)
 
 ## About
 
 Originated as a project of [Team Denver](http://codeforamerica.org/cities/denver/) during the 2014 fellowship at Code for America.
 Originally specific to Denver, it's been redeployed by a few cities. Check out [this twitter list](https://twitter.com/drewSaysGoVeg/cutepetseverywhere/members) to see where.
-
+CutePetsCologne is mainly based on [CutePetsChemnitz](https://github.com/CodeforChemnitz/CutePetsChemnitz)
 
 **Links to Bot**
 
-* [Twitter bot](https://twitter.com/petschemnitz)
+* [Twitter bot](https://twitter.com/CutePetsCologne)
 
 ## Setup & Deployment
 
-I've deployed it on my Raspberry PI running Rasbian ;)
+e.g. on a server running Ubuntu
 
-Using user `pi`
+Using root user
 
 ### iojs
+* Install [io.js](https://iojs.org/)
+
+### npm
+* Install npm
 ```
-cd ~
-wget https://iojs.org/dist/v2.3.4/iojs-v2.3.4-linux-armv6l.tar.xz
-tar xf iojs-v2.3.4-linux-armv6l.tar.xz
-export PATH=/home/pi/iojs-v2.3.4-linux-armv6l/bin:$PATH
+sudo apt-get install npm
 ```
 
 ### ruby
@@ -33,10 +34,11 @@ sudo gem install bundler
 ```
 
 ### Repo
+* Clone the repo to some $path
 ```
-cd /opt/
-git clone https://github.com/CodeforChemnitz/CutePetsChemnitz.git
-cd CutePetsChemnitz
+cd $path
+git clone https://github.com/karen-sch/CutePetsCologne.git
+cd CutePetsCologne
 ```
 
 ### API
@@ -57,10 +59,10 @@ node lib/scraper.js
 
 #### Deploy
 ```
-sudo ln -s /opt/CutePetsChemnitz/API/petschemnitz /etc/init.d
-sudo update-rc.d petschemnitz defaults
-sudo mkdir /var/cache/petschemnitz
-sudo service petschemnitz start
+sudo ln -s /$path/CutePetsCologne/API/petschemnitz /etc/init.d
+sudo update-rc.d petscologne defaults
+sudo mkdir /var/cache/petscologne
+sudo service petscologne start
 ```
 
 ### Twitter
@@ -87,7 +89,7 @@ rake
 #### Deploy
 Adding a cronjob:
 ```
-5 9-22/2 * * * root cd /opt/CutePetsChemnitz && rake
+5 9-22/2 * * * root cd /$path/CutePetsCologne && rake
 ```
 
 

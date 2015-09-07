@@ -1,7 +1,7 @@
 require 'dotenv'
 Dotenv.load
 
-require_relative 'lib/cuties_in_chemnitz'
+require_relative 'lib/cuties_in_cologne'
 
 desc "Tweet random pet."
 task :twitter do
