@@ -5,8 +5,7 @@ require_relative 'lib/cuties_in_cologne'
 
 desc "Tweet random pet."
 task :twitter do
-  #Twit.new(AdoptAPet.random).tweet
-  puts Twit.new(AdoptAPet.random).tweet.inspect
+  Twit.new(AdoptAPet.random).tweet
 end
 
 task :default => :twitter
