@@ -16,7 +16,7 @@ class Twit
   end
 
   def message
-    greeting + " " + pet.name + ". " + pet.desc.slice(0..55) - @hashtag.length + "... " + @hashtag + pet.link
+    greeting + " " + pet.name + ". " + pet.desc.slice(0..55 - @hashtag.length) + "... " + @hashtag + pet.link
   end
 
   def client
