@@ -8,6 +8,7 @@ class Twit
     @pet = pet
     @errlog = Logger.new(STDERR)
     @errlog.level = Logger::WARN #set to Logger:WARN to avoid seing status messages
+    @hashtag = Hashtag.new.random
   end
 
   def greeting
@@ -15,7 +16,7 @@ class Twit
   end
 
   def message
-    greeting + " " + pet.name + ". " + pet.desc.slice(0..55) + "... " + pet.link
+    greeting + " " + pet.name + ". " + pet.desc.slice(0..55) - @hashtag.length + "... " + @hashtag + pet.link
   end
 
   def client
